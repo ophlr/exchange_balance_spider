@@ -44,7 +44,7 @@ throttle = Throttle(5)
 exchange_chain_address_sql = """
     INSERT INTO exchange_chain_address(exchange, chain, address, tag, source)
     VALUES (%s, %s, %s, %s, %s)
-    ON DUPLICATE KEY UPDATE exchange=VALUES(excgange), chain=VALUES(chain), tag=VALUES(tag), source=VALUES(source)
+    ON DUPLICATE KEY UPDATE exchange=VALUES(exchange), chain=VALUES(chain), tag=VALUES(tag), source=VALUES(source)
 """
 balance_of_address_history_sql = """
     INSERT INTO balance_of_address_history(address, coin, balance, source)
