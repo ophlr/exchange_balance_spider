@@ -127,7 +127,6 @@ def get_exchange_addresses(exchange, exchange_name):
     pattern = re.compile('^(?P<tag>%s(?:(?: [0-9]+)|(?:: [a-z]+))?)\t(?P<address>0x[0-9a-f]{40}).*$' % exchange_name, re.I)
     for addr in body:
         addr_list.update(pattern.findall(addr))
-    print(addr_list)
     return addr_list
 
 
@@ -135,9 +134,10 @@ def find_address():
     for exchange, search_name in EXCHANGES.items():
         address_list = set()
         address_list.update(get_exchange_addresses(search_name, search_name))
-        # address_list.update(get_exchange_addresses(search_name + '%20', search_name))
-        # address_list.update(get_exchange_addresses(search_name + ': Hot Wallet', search_name + ': Hot Wallet'))
-        # address_list.update(get_exchange_addresses(search_name + ': Cold Wallet', search_name + ': Cold Wallet'))
+        address_list.update(get_exchange_addresses(search_name + '%20', search_name))
+        address_list.update(get_exchange_addresses(search_name + ': Hot Wallet', search_name + ': Hot Wallet'))
+        address_list.update(get_exchange_addresses(search_name + ': Cold Wallet', search_name + ': Cold Wallet'))
+        print(address_list)
         # for addr in address_list:
         #     logger.info(f"insert into exchange_eth_address with values: {addr[1]}, {exchange}, {addr[0]}")
         #     try:
