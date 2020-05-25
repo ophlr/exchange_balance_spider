@@ -1,0 +1,32 @@
+stages:
+- name: build
+  steps:
+  - runScriptConfig:
+      image: visionyuyu/runner:latest
+      shellScript: echo "start build"
+- name: Create Build Tag
+  steps:
+  - runScriptConfig:
+      image: busybox
+      shellScript: echo "`date '+%Y%m%d'`.${CICD_EXECUTION_SEQUENCE}-${CICD_GIT_COMMIT}-${CICD_GIT_BRANCH}"
+        > .tags
+- name: image
+  steps:
+  - publishImageConfig:
+      dockerfilePath: ./Dockerfile
+      buildContext: .
+      tag: eth-balance-crawler:use-tags-file
+      pushRemote: true
+      registry: 651538853910.dkr.ecr.us-west-2.amazonaws.com
+- name: helm
+  steps:
+  - runScriptConfig:
+      image: 651538853910.dkr.ecr.us-west-2.amazonaws.com/helm_runner:latest
+      shellScript: "cp -a /push_helm.sh .\n sh ./push_helm.sh"
+    env:
+      HELM_PROJECT: eth-balance-crawler
+      HELM_CHART_REPO_DEV: bituniverse_dev_charts
+      HELM_CHART_REPO: bituniverse_charts
+      REGISTRY_REPO: eth-balance-crawler
+timeout: 60
+notification: {}

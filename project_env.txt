@@ -1,0 +1,4 @@
+DEFAULT_DB_HOST: "portfolio.master.rds.oregon.private.bituniverse.org"
+DEFAULT_DB_USER: "portfolio"
+DEFAULT_DB_PASSWORD: "Kingsoft1116"
+DEFAULT_DB_NAME: "portfolio"

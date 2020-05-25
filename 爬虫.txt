@@ -1,0 +1,75 @@
+数据来源：
+  1. 派盾 peckshield   BTC, ETH 交易所资产总额
+  2. chain.info       BTC 交易所资产总额, (分地址数据)
+  3. tokenview        BTC, ETH链 各种币 分地址的资产
+  4. etherscan        ERC20分地址的资产
+
+要收集的数据：
+  1. 每个交易所，各种链的地址
+  2. 每个地址，各种币的数量
+  3. 每个交易所，各种币总额
+
+链：
+    BTC
+        BTC
+        USDT-OMNI
+    ETH(ERC20)
+        ETH
+        USDT-ERC20
+    // TRX
+    // EOS
+
+表结构：
+exchange_chain_address   交易所在每个链上的地址
+    exchange
+    chain
+    address     唯一键
+    tag
+    source      地址来源：手动，其他网站，可能多个
+    create_time
+    modify_time
+
+balance_of_address_history   每个地址的每个币的数量历史数据
+    address
+    coin
+    balance
+    source
+    create_time
+
+balance_of_exchange_history   每个交易所的每个币的总量历史数据
+    exchange
+    chain       可能多个：multiple
+    coin
+    balance
+    source
+    create_time
+
+现有的表：
+    exchange_balance  每个地址的资产
+        加字段变成：balance_of_address_history
+
+    exchange_btc_address
+    exchange_eth_address
+        加字段合并成：exchange_chain_address
+
+    exchange_btc_balances
+    exchange_eth_balances
+        加字段合并成：balance_of_exchange_history
+
+现有的爬虫：
+    peckshield_btc_info.py      派盾，chain.info：每个交易所BTC的总量   每天执行一次
+    peckshield_eth_info.py      派盾：每个交易所ETH的总量   每天执行一次
+    peckshield_btc_info_history_update.py    派盾：刷新每个交易所BTC的总量历史数据      手动运行
+    peckshield_eth_info_history.py    派盾：刷新每个交易所ETH的总量历史数据      手动运行
+    exchange_currency_info.py   etherscan：每个交易所在ETH连上 ETH和USDT-ERC20的 分地址数据     每小时运行
+    import_eth_history.py       etherscan：每个交易所在ETH连上 ETH和USDT-ERC20的 分地址数据 的历史数据      手动运行
+    hydax_usdt_balance_crawler.py   tokenview: hydax BTC, ETH链 USDT 分地址数据
+    renrenbit_balance_crawler.py    tokenview: renrenbit BTC, ETH链 USDT, BTC 分地址数据
+
+整理后爬虫：
+    依据来源：
+        peckshield
+        chain.info
+        tokenview
+        etherscan
+    各脚本独立爬取各来源数据
