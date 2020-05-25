@@ -121,17 +121,13 @@ def get_exchange_addresses(exchange, exchange_name):
             f"with status code: {res.status_code}")
         return addr_list
     body = res.json()
-    print("json------------->\n")
-    print(res.text)
-    print("text------------->\n")
-    print(body)
     if body is None:
         raise ValueError(f'body is {body}')
     # exchange_pattern = get_re_pattern(exchange)
-    pattern = re.compile('^(?P<tag>%s(?:(?: [0-9]+)|(?:: [a-z]+))?)\t(?P<address>0x[0-9a-f]{40}).*$' % exchange_name,
-                         re.I)
+    pattern = re.compile('^(?P<tag>%s(?:(?: [0-9]+)|(?:: [a-z]+))?)\t(?P<address>0x[0-9a-f]{40}).*$' % exchange_name, re.I)
     for addr in body:
         addr_list.update(pattern.findall(addr))
+    print(addr_list)
     return addr_list
 
 
