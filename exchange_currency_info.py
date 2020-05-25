@@ -41,12 +41,12 @@ CURRENCY_CONTRACT = {
 
 throttle = Throttle(5)
 
-addr_sql = """
+exchange_chain_address_sql = """
     INSERT INTO exchange_chain_address(exchange, chain, address, tag, source)
     VALUES (%s, %s, %s, %s, %s)
     ON DUPLICATE KEY UPDATE exchange=VALUES(excgange), chain=VALUES(chain), tag=VALUES(tag), source=VALUES(source)
 """
-balance_sql = """
+balance_of_address_history_sql = """
     INSERT INTO balance_of_address_history(address, coin, balance, source)
     VALUES (%s, %s, %s, %s)
 """
@@ -137,14 +137,13 @@ def find_address():
         address_list.update(get_exchange_addresses(search_name + '%20', search_name))
         address_list.update(get_exchange_addresses(search_name + ': Hot Wallet', search_name + ': Hot Wallet'))
         address_list.update(get_exchange_addresses(search_name + ': Cold Wallet', search_name + ': Cold Wallet'))
-        print(address_list)
-        # for addr in address_list:
-        #     logger.info(f"insert into exchange_eth_address with values: {addr[1]}, {exchange}, {addr[0]}")
-        #     try:
-        #         execute_sql(addr_sql, (exchange, "ETH", addr[1], addr[0], "etherscan"))
-        #     except MySQLdb._exceptions.IntegrityError:
-        #         logger.warning(f"database integrityerror, address: {addr}")
-        #         continue
+        for addr in address_list:
+            try:
+                execute_sql(exchange_chain_address_sql, (exchange, "ETH", addr[1], addr[0], "etherscan"))
+                logger.info(f"add data: exchange: {exchange}, address: {addr[1]}")
+            except MySQLdb._exceptions.IntegrityError:
+                logger.warning(f"database integrityerror, address: {addr}")
+                continue
 
 
 def find_balances():
@@ -155,12 +154,12 @@ def find_balances():
         balance = get_account_balance(addr)
         if balance:
             logger.info(f"insert balance_of_address_history with values: {addr}, {balance}, usdt")
-            execute_sql(balance_sql, (addr, "USDT", balance, "etherscan"))
+            execute_sql(balance_of_address_history_sql, (addr, "USDT", balance, "etherscan"))
 
         eth_balance = get_eth_balance(addr)
         if eth_balance:
             logger.info(f"insert exchange_balance with values: {addr}, {eth_balance}, eth")
-            execute_sql(balance_sql, (addr, "ETH", balance, 'etherscan'))
+            execute_sql(balance_of_address_history_sql, (addr, "ETH", balance, 'etherscan'))
 
 
 if __name__ == "__main__":
