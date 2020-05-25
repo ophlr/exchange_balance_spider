@@ -56,14 +56,6 @@ DEFAULT_REQUEST_HEADERS = {
     'accept-encoding': 'gzip, deflate, br',
     'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8',
     'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
-    'cache-control': 'no-cache',
-    'pragma': 'no-cache',
-    'sec-fetch-dest': 'document',
-    'sec-fetch-mode': 'navigate',
-    'sec-fetch-site': None,
-    'sec-fetch-user': '?1',
-    'upgrade-insecure-requests': "1",
-    'cookie': '__cfduid=d443ab6e75bd517c146829383dc5ad0c41590232720; _ga=GA1.2.516684532.1590239418; __gads=ID=0d1643c2d74c8d68:T=1590239418:S=ALNI_MaCOroGzReTy-SbOA2Ejz-BGoRzJw; cf_clearance=501c25959dc5681f65d68c466aabc66192d36721-1590408225-0-250; ASP.NET_SessionId=xlnntvgkycjzszkasx1wxbxq',
 }
 
 
@@ -129,9 +121,9 @@ def get_exchange_addresses(exchange, exchange_name):
             f"with status code: {res.status_code}")
         return addr_list
     body = res.json()
-    print("------------->\n")
+    print("json------------->\n")
     print(res.text)
-    print("------------->\n")
+    print("text------------->\n")
     print(body)
     if body is None:
         raise ValueError(f'body is {body}')
@@ -147,9 +139,9 @@ def find_address():
     for exchange, search_name in EXCHANGES.items():
         address_list = set()
         address_list.update(get_exchange_addresses(search_name, search_name))
-        address_list.update(get_exchange_addresses(search_name + '%20', search_name))
-        address_list.update(get_exchange_addresses(search_name + ': Hot Wallet', search_name + ': Hot Wallet'))
-        address_list.update(get_exchange_addresses(search_name + ': Cold Wallet', search_name + ': Cold Wallet'))
+        # address_list.update(get_exchange_addresses(search_name + '%20', search_name))
+        # address_list.update(get_exchange_addresses(search_name + ': Hot Wallet', search_name + ': Hot Wallet'))
+        # address_list.update(get_exchange_addresses(search_name + ': Cold Wallet', search_name + ': Cold Wallet'))
         # for addr in address_list:
         #     logger.info(f"insert into exchange_eth_address with values: {addr[1]}, {exchange}, {addr[0]}")
         #     try:
