@@ -20,10 +20,8 @@ from configs.constants import *
 from utils.log_util import setup_logging
 import csv
 
-
-setup_logging()
+# setup_logging()
 logger = logging.getLogger()
-
 
 EXCHANGES = {}
 with open('exchange_names.csv', 'r') as file:
@@ -31,7 +29,6 @@ with open('exchange_names.csv', 'r') as file:
     reader = csv.DictReader(file, fieldnames=fieldnames, delimiter=',')
     for row in reader:
         EXCHANGES[row['exchange']] = row['search_name']
-
 
 CURRENCY_DECIMAL = {
     'usdt': 6,
@@ -55,9 +52,18 @@ balance_sql = """
 """
 
 DEFAULT_REQUEST_HEADERS = {
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    'Accept-Language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7',
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36'
+    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+    'accept-encoding': 'gzip, deflate, br',
+    'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8',
+    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
+    'cache-control': 'no-cache',
+    'pragma': 'no-cache',
+    'sec-fetch-dest': 'document',
+    'sec-fetch-mode': 'navigate',
+    'sec-fetch-site': None,
+    'sec-fetch-user': '?1',
+    'upgrade-insecure-requests': "1",
+    'cookie': '__cfduid=d443ab6e75bd517c146829383dc5ad0c41590232720; _ga=GA1.2.516684532.1590239418; __gads=ID=0d1643c2d74c8d68:T=1590239418:S=ALNI_MaCOroGzReTy-SbOA2Ejz-BGoRzJw; cf_clearance=501c25959dc5681f65d68c466aabc66192d36721-1590408225-0-250; ASP.NET_SessionId=xlnntvgkycjzszkasx1wxbxq',
 }
 
 
@@ -73,8 +79,8 @@ def get_account_balance(exchange_addr, currency='usdt'):
     if delay:
         logger.debug('GET URL throttles. delay for %.2f' % (delay))
     url = f'https://api.etherscan.io/api?module=account&action=tokenbalance&' \
-        f'contractaddress={contract_addr}&address={exchange_addr}&' \
-        f'tag=latest&apikey={API_TOKEN}'
+          f'contractaddress={contract_addr}&address={exchange_addr}&' \
+          f'tag=latest&apikey={API_TOKEN}'
     res = requests.get(url, timeout=5)
     if not res or res.status_code != 200:
         logger.warning(
@@ -123,10 +129,15 @@ def get_exchange_addresses(exchange, exchange_name):
             f"with status code: {res.status_code}")
         return addr_list
     body = res.json()
+    print("------------->\n")
+    print(res.text)
+    print("------------->\n")
+    print(body)
     if body is None:
         raise ValueError(f'body is {body}')
     # exchange_pattern = get_re_pattern(exchange)
-    pattern = re.compile('^(?P<tag>%s(?:(?: [0-9]+)|(?:: [a-z]+))?)\t(?P<address>0x[0-9a-f]{40}).*$' % exchange_name, re.I)
+    pattern = re.compile('^(?P<tag>%s(?:(?: [0-9]+)|(?:: [a-z]+))?)\t(?P<address>0x[0-9a-f]{40}).*$' % exchange_name,
+                         re.I)
     for addr in body:
         addr_list.update(pattern.findall(addr))
     return addr_list
@@ -139,17 +150,17 @@ def find_address():
         address_list.update(get_exchange_addresses(search_name + '%20', search_name))
         address_list.update(get_exchange_addresses(search_name + ': Hot Wallet', search_name + ': Hot Wallet'))
         address_list.update(get_exchange_addresses(search_name + ': Cold Wallet', search_name + ': Cold Wallet'))
-        for addr in address_list:
-            logger.info(f"insert into exchange_eth_address with values: {addr[1]}, {exchange}, {addr[0]}")
-            try:
-                execute_sql(addr_sql, (exchange, "ETH", addr[1], addr[0], "etherscan"))
-            except MySQLdb._exceptions.IntegrityError:
-                logger.warning(f"database integrityerror, address: {addr}")
-                continue
+        # for addr in address_list:
+        #     logger.info(f"insert into exchange_eth_address with values: {addr[1]}, {exchange}, {addr[0]}")
+        #     try:
+        #         execute_sql(addr_sql, (exchange, "ETH", addr[1], addr[0], "etherscan"))
+        #     except MySQLdb._exceptions.IntegrityError:
+        #         logger.warning(f"database integrityerror, address: {addr}")
+        #         continue
 
 
 def find_balances():
-    addresses = read_all_from_db('select address from balance_of_exchange_history', [])
+    addresses = read_all_from_db('select address from exchange_chain_address', [])
 
     for address in addresses:
         addr = address['address']
@@ -166,4 +177,4 @@ def find_balances():
 
 if __name__ == "__main__":
     find_address()
-    find_balances()
+    # find_balances()
