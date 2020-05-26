@@ -144,8 +144,8 @@ def get_all_balance(exchange):
         print(f"exchange: {exchange}, chain: {chain}, address: {address}")
         save_to_balance_of_address_history(address, "BTC", btc_balance, "tokenview")
         save_to_balance_of_address_history(address, "USDT", usdt_balance, "tokenview")
-        btc_balances += btc_balance
-        usdt_balance += usdt_balance
+        btc_balances += btc_balance if btc_balance else 0
+        usdt_balance += usdt_balance if usdt_balance else 0
     save_to_balance_of_exchange_history(exchange, "multiple", "BTC", btc_balances, "tokenview")
     save_to_balance_of_exchange_history(exchange, "multiple", "USDT", usdt_balances, "tokenview")
 
