@@ -2,10 +2,11 @@ import requests
 import logging
 import datetime
 import time
+
 from lxml import html
 from decimal import Decimal
 from utils.common_util import retry
-from utils.db_helper import execute_sql
+from utils.db_helper import execute_sql, read_all_from_db
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +26,9 @@ balance_of_exchange_history = """
     VALUES (%s, %s, %s, %s, %s)
 """
 
-HYDAX_ADDR = "3Bm99oWTc7Eebrv4TEUBTY86t4AFXSdPRK"
+HYDAX_ADDR = [
+    "3Bm99oWTc7Eebrv4TEUBTY86t4AFXSdPRK"
+]
 
 USDT_TOKEN_VIEW_ADDRESSES = [
     '1PktPwDM1h85GW4ab7Xgv83TALXJ71rXLt',
@@ -67,6 +70,28 @@ HBTC_BTC_ADDRESSES = [
 ]
 
 
+def add_address():
+    now = datetime.datetime.utcnow()
+    for address in USDT_TOKEN_VIEW_ADDRESSES:
+        print(f"add address: {address}")
+        execute_sql(exchange_chain_address_sql, ('renrenbit', 'BTC', address, 'renrenbit usdt token', 'tokenview', now))
+    for address in USDT_ERC_20_ADDRESSES:
+        print(f"add address: {address}")
+        execute_sql(exchange_chain_address_sql, ('renrenbit', 'ETH', address, 'renrenbit usdt erc20', 'tokenview', now))
+    for address in ETH_ERC_20_ADDRESSES:
+        print(f"add address: {address}")
+        execute_sql(exchange_chain_address_sql, ('renrenbit', 'ETH', address, 'renrenbit eth erc20', 'tokenview', now))
+    for address in BTC_TOKEN_VIEW_ADDRESSES:
+        print(f"add address: {address}")
+        execute_sql(exchange_chain_address_sql, ('renrenbit', 'BTC', address, 'renrenbit btc', 'tokenview', now))
+    for address in HBTC_BTC_ADDRESSES:
+        print(f"add address: {address}")
+        execute_sql(exchange_chain_address_sql, ('hbtc', 'BTC', address, 'hbtc btc', 'tokenview', now))
+    for address in HYDAX_ADDR:
+        print(f"add address: {address}")
+        execute_sql(exchange_chain_address_sql, ('hydax', "BTC", address, 'hydax', 'tokenview', now))
+
+
 @retry(requests.exceptions.RequestException, logger=logger)
 def get_balance_from_tokenview(address):
     res = requests.get(f"https://tokenview.com/en/search/{address}", timeout=10)
@@ -88,7 +113,8 @@ def get_balance_from_tokenview(address):
         usdt_balance = None
     else:
         usdt_balance = usdt_balances[0].strip()
-    return Decimal(usdt_balance) if usdt_balance is not None else None, Decimal(btc_balance) if btc_balance is not None else None
+    return Decimal(usdt_balance) if usdt_balance is not None else None, Decimal(
+        btc_balance) if btc_balance is not None else None
 
 
 def save_to_balance_of_address_history(address, coin, balance, source):
@@ -107,12 +133,18 @@ def save_to_balance_of_exchange_history(exchange, chain, coin, balance, source):
 
 
 def get_all_balance():
-    for address in set(USDT_TOKEN_VIEW_ADDRESSES + BTC_TOKEN_VIEW_ADDRESSES):
+    addresses = read_all_from_db('select exchange, address from exchange_chain_address', [])
+
+    for exchange, chain, address in addresses:
         usdt_balance, btc_balance = get_balance_from_tokenview(address)
         time.sleep(0.5)
+        print(f"exchange: {exchange}, chain: {chain}, address: {address}")
         save_to_balance_of_address_history(address, "BTC", btc_balance, "tokenview")
         save_to_balance_of_address_history(address, "USDT", usdt_balance, "tokenview")
+        save_to_balance_of_exchange_history(exchange, chain, "BTC", btc_balance, "tokenview")
+        save_to_balance_of_exchange_history(exchange, chain, "USDT", usdt_balance, "tokenview")
 
 
 if __name__ == '__main__':
+    add_address()
     get_all_balance()
