@@ -132,10 +132,9 @@ def save_to_balance_of_exchange_history(exchange, chain, coin, balance, source):
         logger.warning(f"cannot save data chain: {chain} coin: {coin}, balance: {balance}")
 
 
-def get_all_balance():
-    results = read_all_from_db('select exchange, chain, address from exchange_chain_address', [])
-    print(results)
-
+def get_all_balance(exchange):
+    results = read_all_from_db(f'select exchange, chain, address from exchange_chain_address where exchange = "{exchange}"', [])
+    btc_balances, usdt_balances = 0, 0
     for result in results:
         exchange = result.get("exchange")
         chain = result.get("chain")
@@ -145,10 +144,14 @@ def get_all_balance():
         print(f"exchange: {exchange}, chain: {chain}, address: {address}")
         save_to_balance_of_address_history(address, "BTC", btc_balance, "tokenview")
         save_to_balance_of_address_history(address, "USDT", usdt_balance, "tokenview")
-        save_to_balance_of_exchange_history(exchange, chain, "BTC", btc_balance, "tokenview")
-        save_to_balance_of_exchange_history(exchange, chain, "USDT", usdt_balance, "tokenview")
+        btc_balances += btc_balance
+        usdt_balance += usdt_balance
+    save_to_balance_of_exchange_history(exchange, "multiple", "BTC", btc_balances, "tokenview")
+    save_to_balance_of_exchange_history(exchange, "multiple", "USDT", usdt_balances, "tokenview")
 
 
 if __name__ == '__main__':
     add_address()
-    get_all_balance()
+    get_all_balance("renrenbit")
+    get_all_balance("hbtc")
+    get_all_balance("hydax")
