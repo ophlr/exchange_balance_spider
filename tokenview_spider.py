@@ -133,7 +133,7 @@ def save_to_balance_of_exchange_history(exchange, chain, coin, balance, source):
 
 
 def get_all_balance():
-    addresses = read_all_from_db('select exchange, address from exchange_chain_address', [])
+    addresses = read_all_from_db('select exchange, chain, address from exchange_chain_address', [])
 
     for exchange, chain, address in addresses:
         usdt_balance, btc_balance = get_balance_from_tokenview(address)
