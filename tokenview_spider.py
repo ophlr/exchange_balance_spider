@@ -134,6 +134,7 @@ def save_to_balance_of_exchange_history(exchange, chain, coin, balance, source):
 
 def get_all_balance():
     results = read_all_from_db('select exchange, chain, address from exchange_chain_address', [])
+    print(results)
 
     for result in results:
         exchange = result[0]
