@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 exchange_chain_address_sql = """
     INSERT INTO exchange_chain_address(exchange, chain, address, tag, source, modify_time)
     VALUES (%s, %s, %s, %s, %s, %s)
-    ON DUPLICATE KEY UPDATE exchange=VALUES(excgange), chain=VALUES(chain), tag=VALUES(tag), source=VALUES(source), modify_time=VALUES(modify_time)
+    ON DUPLICATE KEY UPDATE exchange=VALUES(exchange), chain=VALUES(chain), tag=VALUES(tag), source=VALUES(source), modify_time=VALUES(modify_time)
 """
 
 balance_of_address_history_sql = """
