@@ -80,6 +80,7 @@ def get_account_balance(exchange_addr, currency='usdt'):
             f"with status code: {res.status_code}")
         return None
     body = res.json()
+    print(body)
     if not body:
         raise ValueError(f'body is {body}')
 
@@ -151,7 +152,9 @@ def find_balances():
 
     for address in addresses:
         addr = address['address']
+        print(addr)
         balance = get_account_balance(addr)
+        print(balance)
         if balance:
             logger.info(f"insert balance_of_address_history with values: {addr}, {balance}, usdt")
             execute_sql(balance_of_address_history_sql, (addr, "USDT", balance, "etherscan"))
@@ -163,5 +166,5 @@ def find_balances():
 
 
 if __name__ == "__main__":
-    find_address()
-    # find_balances()
+    # find_address()
+    find_balances()
