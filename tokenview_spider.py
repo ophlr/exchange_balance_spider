@@ -137,9 +137,9 @@ def get_all_balance():
     print(results)
 
     for result in results:
-        exchange = result[0]
-        chain = result[1]
-        address = result[2]
+        exchange = result.get("exchange")
+        chain = result.get("chain")
+        address = result.get("address")
         usdt_balance, btc_balance = get_balance_from_tokenview(address)
         time.sleep(0.5)
         print(f"exchange: {exchange}, chain: {chain}, address: {address}")
