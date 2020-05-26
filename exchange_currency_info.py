@@ -80,9 +80,13 @@ def get_account_balance(exchange_addr, currency='usdt'):
             f"with status code: {res.status_code}")
         return None
     body = res.json()
-    print(body)
     if not body:
         raise ValueError(f'body is {body}')
+
+    if body["message"] == "NOTOK":
+        logger.warning(f"error response body: {body}")
+        return None
+    print(body)
 
     decimal_num = get_decimal(str(body['result']), CURRENCY_DECIMAL.get(currency))
     return decimal_num
